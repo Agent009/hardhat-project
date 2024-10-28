@@ -93,7 +93,14 @@ describe("HelloWorld", function () {
   });
 
   it("Should change text correctly", async function () {
-    // TODO
-    throw Error("Not implemented");
+    const newText = "New Text";
+    const { publicClient, helloWorldContract } = await loadFixture(deployContractFixture);
+    const txHash = await helloWorldContract.write.setText([
+      newText,
+    ]);
+    const receipt = await publicClient.getTransactionReceipt({ hash: txHash });
+    expect(receipt.status).to.equal("success");
+    const helloWorldText = await helloWorldContract.read.helloWorld();
+    expect(helloWorldText).to.equal(newText);
   });
 });
