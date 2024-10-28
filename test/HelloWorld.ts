@@ -7,6 +7,8 @@ import { expect } from "chai";
 // https://hardhat.org/hardhat-network-helpers/docs/reference#fixtures
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 
+const nonOwnerError = "Caller is not the owner";
+
 // https://mochajs.org/#getting-started
 describe("HelloWorld", function () {
   async function deployContractFixture() {
@@ -57,7 +59,7 @@ describe("HelloWorld", function () {
       helloWorldContractAsOtherAccount.write.transferOwnership([
         otherAccount.account.address,
       ])
-    ).to.be.rejectedWith("Caller is not the owner");
+    ).to.be.rejectedWith(nonOwnerError);
   });
 
   it("Should execute transferOwnership correctly", async function () {
@@ -84,12 +86,25 @@ describe("HelloWorld", function () {
       helloWorldContractAsPreviousAccount.write.transferOwnership([
         owner.account.address,
       ])
-    ).to.be.rejectedWith("Caller is not the owner");
+    ).to.be.rejectedWith(nonOwnerError);
   });
 
   it("Should not allow anyone other than owner to change text", async function () {
-    // TODO
-    throw Error("Not implemented");
+    // Call setText with someone other than the owner.
+    const newText = "New Text";
+    const { helloWorldContract, otherAccount } = await loadFixture(deployContractFixture);
+    
+    // Interact with the contract as otherAccount
+    const helloWorldContractAsOtherAccount = await viem.getContractAt(
+      "HelloWorld",
+      helloWorldContract.address,
+      { client: { wallet: otherAccount } }
+    );
+    
+    // Attempt to call setText as a non-owner
+    await expect(
+      helloWorldContractAsOtherAccount.write.setText([newText])
+    ).to.be.rejectedWith(nonOwnerError);
   });
 
   it("Should change text correctly", async function () {

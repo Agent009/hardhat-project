@@ -1,5 +1,4 @@
-import type { HardhatUserConfig } from "hardhat/config";
-import { task } from "hardhat/config";
+import { task, type HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox-viem";
 
 const config: HardhatUserConfig = {
