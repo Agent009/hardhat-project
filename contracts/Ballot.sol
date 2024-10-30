@@ -22,6 +22,7 @@ contract Ballot {
 
     // This declares a state variable that
     // stores a `Voter` struct for each possible address.
+    // Will always return a result, and will be zeroed for non-existing mappings.
     mapping(address => Voter) public voters;
 
     // A dynamically-sized array of `Proposal` structs.
