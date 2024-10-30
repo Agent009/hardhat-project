@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
+let alchemyAPIKey = process.env.ALCHEMY_API_KEY || "";
 export const constants = Object.freeze({
   account: {
     deployerMemonic: process.env.MNEMONIC || "",
@@ -14,7 +15,8 @@ export const constants = Object.freeze({
   },
   integrations: {
     alchemy: {
-      apiKey: process.env.ALCHEMY_API_KEY || "",
+      apiKey: alchemyAPIKey,
+      sepolia: `https://eth-sepolia.g.alchemy.com/v2/${alchemyAPIKey}`,
     },
     etherscan: {
       apiKey: process.env.ETHERSCAN_API_KEY || "",
