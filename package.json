@@ -6,7 +6,10 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "hh:accounts": "hardhat accounts",
-    "hh:clean": "hardhat clean"
+    "hh:clean": "hardhat clean",
+    "hh:deploy": "hardhat run ./scripts/DeployWithHardhat.ts",
+    "hh:deploy:sepolia": "hardhat run ./scripts/DeployWithHardhat.ts --network sepolia",
+    "hh:deploy:viem": "ts-node --files ./scripts/DeployWithViem.ts \"arg1\" \"arg2\" \"arg3\""
   },
   "author": "Mohammad Amir <amir@connextar.com>",
   "license": "ISC",
@@ -14,5 +17,8 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
     "hardhat": "^2.22.15"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
   }
 }
