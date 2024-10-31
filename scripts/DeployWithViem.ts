@@ -42,12 +42,12 @@ async function main() {
   });
   console.log("scripts -> DeployWithViem -> transaction hash", hash, "waiting for confirmations...");
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  console.log("scripts -> DeployWithViem -> ballot contract deployed to", receipt.contractAddress);
   const gasPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice) : "N/A";
   const gasUsed = receipt.gasUsed ? receipt.gasUsed.toString() : "N/A";
-  const totalPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
-  console.log("scripts -> DeployWithViem -> ballot contract deployed to", receipt.contractAddress);
-  console.log("scripts -> DeployWithViem -> transaction confirmed -> receipt", receipt);
-  console.log("scripts -> DeployWithViem -> gas -> price", gasPrice, "used", gasUsed, "totalPrice", totalPrice);
+  const totalCost = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
+  console.log("scripts -> GiveRightToVote -> transaction confirmed -> receipt", receipt.blockNumber);
+  console.log("scripts -> GiveRightToVote -> gas -> price", gasPrice, "used", gasUsed, "totalCost", totalCost);
 
   // Reading information from a deployed contract
   console.log("scripts -> DeployWithViem -> proposals: ");

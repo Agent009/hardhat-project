@@ -74,9 +74,9 @@ async function main() {
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
       const gasPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice) : "N/A";
       const gasUsed = receipt.gasUsed ? receipt.gasUsed.toString() : "N/A";
-      const totalPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
-      console.log("scripts -> CastVote -> transaction confirmed -> receipt", receipt);
-      console.log("scripts -> CastVote -> gas -> price", gasPrice, "used", gasUsed, "totalPrice", totalPrice);
+      const totalCost = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
+      console.log("scripts -> GiveRightToVote -> transaction confirmed -> receipt", receipt.blockNumber);
+      console.log("scripts -> GiveRightToVote -> gas -> price", gasPrice, "used", gasUsed, "totalCost", totalCost);
 
       if (receipt.status === "success") {
         console.log("scripts -> CastVote -> transaction succeeded");
