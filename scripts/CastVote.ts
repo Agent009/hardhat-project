@@ -1,37 +1,12 @@
-import { createPublicClient, http, createWalletClient, formatEther, hexToString, toHex } from "viem";
+import { createPublicClient, http, createWalletClient, formatEther, hexToString } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { abi, bytecode } from "../artifacts/contracts/Ballot.sol/Ballot.json";
+import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
 import { constants } from "../lib/constants";
 
 const PROPOSAL_NAME_IDX = 0;
-const PROPOSAL_VOTES_IDX = 1;
 
 async function main() {
-  const publicClient = createPublicClient({
-    chain: sepolia,
-    transport: http(constants.integrations.alchemy.sepolia),
-  });
-  const blockNumber = await publicClient.getBlockNumber();
-  console.log("scripts -> CastNote -> last block number", blockNumber);
-
-  // Create a wallet client
-  const account = privateKeyToAccount(`0x${constants.account.deployerPrivateKey}`);
-  const deployer = createWalletClient({
-    account,
-    chain: sepolia,
-    transport: http(constants.integrations.alchemy.sepolia),
-  });
-  console.log("scripts -> CastNote -> deployer address", deployer.account.address);
-  const balance = await publicClient.getBalance({
-    address: deployer.account.address,
-  });
-  console.log(
-    "scripts -> CastNote -> deployer balance",
-    formatEther(balance),
-    deployer.chain.nativeCurrency.symbol
-  );
-
   // Fetch parameters
   const ARG_PROPOSAL_NO_IDX = 0;
   const ARG_CONTRACT_ADDRESS_IDX = 1;
@@ -49,7 +24,31 @@ async function main() {
   if (!/^0x[a-fA-F0-9]{40}$/.test(contractAddress))
     throw new Error("Invalid contract address provided.");
 
-  console.log("scripts -> CastNote -> contract", contractAddress, "proposal", proposalIndex);
+  console.log("scripts -> CastVote -> contract", contractAddress, "proposal", proposalIndex);
+
+  const publicClient = createPublicClient({
+    chain: sepolia,
+    transport: http(constants.integrations.alchemy.sepolia),
+  });
+  const blockNumber = await publicClient.getBlockNumber();
+  console.log("scripts -> CastVote -> last block number", blockNumber);
+
+  // Create a wallet client
+  const walletClient = createWalletClient({
+    account: privateKeyToAccount(`0x${constants.account.deployerPrivateKey}`),
+    chain: sepolia,
+    transport: http(constants.integrations.alchemy.sepolia),
+  });
+  console.log("scripts -> CastVote -> deployer address", walletClient.account.address);
+  const balance = await publicClient.getBalance({
+    address: walletClient.account.address,
+  });
+  console.log(
+    "scripts -> CastVote -> deployer balance",
+    formatEther(balance),
+    walletClient.chain.nativeCurrency.symbol
+  );
+
   const proposal = (await publicClient.readContract({
     address: contractAddress,
     abi,
@@ -57,31 +56,35 @@ async function main() {
     args: [BigInt(proposalIndex)],
   })) as any[];
   const name = hexToString(proposal[PROPOSAL_NAME_IDX], { size: 32 });
-  console.log("scripts -> CastNote -> Voting to proposal", name);
-  console.log("scripts -> CastNote -> Confirm? (Y/n)");
+  console.log("scripts -> CastVote -> Voting to proposal", name);
+  console.log("scripts -> CastVote -> Confirm? (Y/n)");
 
   const stdin = process.stdin;
   // Set encoding to handle string input
   stdin.setEncoding('utf8');
   stdin.on("data", async function (d) {
     if (d.toString().trim().toLowerCase() != "n") {
-      const hash = await deployer.writeContract({
+      const hash = await walletClient.writeContract({
         address: contractAddress,
         abi,
         functionName: "vote",
         args: [BigInt(proposalIndex)],
       });
-      console.log("scripts -> CastNote -> transaction hash", hash, "waiting for confirmations...");
+      console.log("scripts -> CastVote -> transaction hash", hash, "waiting for confirmations...");
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      console.log("scripts -> CastNote -> transaction confirmed", receipt);
+      const gasPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice) : "N/A";
+      const gasUsed = receipt.gasUsed ? receipt.gasUsed.toString() : "N/A";
+      const totalPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
+      console.log("scripts -> CastVote -> transaction confirmed -> receipt", receipt);
+      console.log("scripts -> CastVote -> gas -> price", gasPrice, "used", gasUsed, "totalPrice", totalPrice);
 
       if (receipt.status === "success") {
-        console.log("scripts -> CastNote -> transaction succeeded");
+        console.log("scripts -> CastVote -> transaction succeeded");
       } else {
-        console.error("scripts -> CastNote -> transaction failed");
+        console.error("scripts -> CastVote -> transaction failed");
       }
     } else {
-      console.log("scripts -> CastNote -> operation cancelled");
+      console.log("scripts -> CastVote -> operation cancelled");
     }
 
     process.exit();
@@ -89,6 +92,9 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error);
+  const message = error instanceof Error ? ("reason" in error && error.reason) || error.message : "";
+  console.error("scripts -> failed with error ->", message);
+  // console.log("\n\nError details:");
+  // console.error(error);
   process.exitCode = 1;
 });

@@ -11,7 +11,8 @@
     "deploy:hh:sepolia": "hardhat run ./scripts/DeployWithHardhat.ts --network sepolia",
     "deploy:viem": "ts-node --files ./scripts/DeployWithViem.ts \"arg1\" \"arg2\" \"arg3\"",
     "cast-vote": "npx ts-node --files ./scripts/CastVote.ts",
-    "get-proposal": "npx ts-node --files ./scripts/GetProposal.ts"
+    "get-proposal": "npx ts-node --files ./scripts/GetProposal.ts",
+    "grant-vote": "npx ts-node --files ./scripts/GiveRightToVote.ts"
   },
   "author": "Mohammad Amir <amir@connextar.com>",
   "license": "ISC",

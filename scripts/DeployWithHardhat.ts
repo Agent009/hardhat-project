@@ -32,6 +32,7 @@ async function main() {
 }
 
 main().catch((error) => {
+  console.log("\n\nError details:");
   console.error(error);
   process.exitCode = 1;
 });

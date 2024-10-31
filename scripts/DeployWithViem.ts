@@ -18,9 +18,8 @@ async function main() {
   console.log("scripts -> DeployWithViem -> last block number", blockNumber);
 
   // Create a wallet client
-  const account = privateKeyToAccount(`0x${constants.account.deployerPrivateKey}`);
   const deployer = createWalletClient({
-    account,
+    account: privateKeyToAccount(`0x${constants.account.deployerPrivateKey}`),
     chain: sepolia,
     transport: http(constants.integrations.alchemy.sepolia),
   });
@@ -43,7 +42,12 @@ async function main() {
   });
   console.log("scripts -> DeployWithViem -> transaction hash", hash, "waiting for confirmations...");
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  const gasPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice) : "N/A";
+  const gasUsed = receipt.gasUsed ? receipt.gasUsed.toString() : "N/A";
+  const totalPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
   console.log("scripts -> DeployWithViem -> ballot contract deployed to", receipt.contractAddress);
+  console.log("scripts -> DeployWithViem -> transaction confirmed -> receipt", receipt);
+  console.log("scripts -> DeployWithViem -> gas -> price", gasPrice, "used", gasUsed, "totalPrice", totalPrice);
 
   // Reading information from a deployed contract
   console.log("scripts -> DeployWithViem -> proposals: ");
@@ -61,6 +65,7 @@ async function main() {
 }
 
 main().catch((error) => {
+  console.log("\n\nError details:");
   console.error(error);
   process.exitCode = 1;
 });

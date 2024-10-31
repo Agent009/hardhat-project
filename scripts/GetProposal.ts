@@ -7,13 +7,6 @@ const PROPOSAL_NAME_IDX = 0;
 const PROPOSAL_VOTES_IDX = 1;
 
 async function main() {
-  const publicClient = createPublicClient({
-    chain: sepolia,
-    transport: http(constants.integrations.alchemy.sepolia),
-  });
-  const blockNumber = await publicClient.getBlockNumber();
-  console.log("scripts -> GetProposals -> last block number", blockNumber);
-
   // Fetch parameters
   const ARG_PROPOSAL_NO_IDX = 0;
   const ARG_CONTRACT_ADDRESS_IDX = 1;
@@ -32,6 +25,13 @@ async function main() {
     throw new Error("Invalid contract address provided.");
 
   console.log("scripts -> GetProposals -> contract", contractAddress, "proposal", proposalIndex);
+  const publicClient = createPublicClient({
+    chain: sepolia,
+    transport: http(constants.integrations.alchemy.sepolia),
+  });
+  const blockNumber = await publicClient.getBlockNumber();
+  console.log("scripts -> GetProposals -> last block number", blockNumber);
+
   const proposal = (await publicClient.readContract({
     address: contractAddress,
     abi,
@@ -44,6 +44,9 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error);
+  const message = error instanceof Error ? ("reason" in error && error.reason) || error.message : "";
+  console.error("scripts -> failed with error ->", message);
+  // console.log("\n\nError details:");
+  // console.error(error);
   process.exitCode = 1;
 });
