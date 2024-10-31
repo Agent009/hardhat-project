@@ -9,13 +9,13 @@ async function main() {
   // Fetch proposals
   const proposals = process.argv.slice(2);
   if (!proposals || proposals.length < 1)
-    throw new Error("scripts -> DeployWithViem -> Proposals not provided");
+    throw new Error("scripts -> DeployWithViem -> proposals not provided");
   const publicClient = createPublicClient({
     chain: sepolia,
     transport: http(constants.integrations.alchemy.sepolia),
   });
   const blockNumber = await publicClient.getBlockNumber();
-  console.log("scripts -> DeployWithViem -> Last block number:", blockNumber);
+  console.log("scripts -> DeployWithViem -> last block number", blockNumber);
 
   // Create a wallet client
   const account = privateKeyToAccount(`0x${constants.account.deployerPrivateKey}`);
@@ -24,30 +24,29 @@ async function main() {
     chain: sepolia,
     transport: http(constants.integrations.alchemy.sepolia),
   });
-  console.log("scripts -> DeployWithViem -> Deployer address:", deployer.account.address);
+  console.log("scripts -> DeployWithViem -> deployer address", deployer.account.address);
   const balance = await publicClient.getBalance({
     address: deployer.account.address,
   });
   console.log(
-    "scripts -> DeployWithViem -> Deployer balance:",
+    "scripts -> DeployWithViem -> deployer balance",
     formatEther(balance),
     deployer.chain.nativeCurrency.symbol
   );
 
   // Deploy contract
-  console.log("\nscripts -> DeployWithViem -> Deploying Ballot contract");
+  console.log("\nscripts -> DeployWithViem -> deploying Ballot contract");
   const hash = await deployer.deployContract({
     abi,
     bytecode: bytecode as `0x${string}`,
     args: [proposals.map((prop) => toHex(prop, { size: 32 }))],
   });
-  console.log("scripts -> DeployWithViem -> Transaction hash:", hash);
-  console.log("scripts -> DeployWithViem -> Waiting for confirmations...");
+  console.log("scripts -> DeployWithViem -> transaction hash", hash, "waiting for confirmations...");
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
-  console.log("scripts -> DeployWithViem -> Ballot contract deployed to:", receipt.contractAddress);
+  console.log("scripts -> DeployWithViem -> ballot contract deployed to", receipt.contractAddress);
 
   // Reading information from a deployed contract
-  console.log("scripts -> DeployWithViem -> Proposals: ");
+  console.log("scripts -> DeployWithViem -> proposals: ");
   for (let index = 0; index < proposals.length; index++) {
     const proposal = (await publicClient.readContract({
       // @ts-expect-error ignore
