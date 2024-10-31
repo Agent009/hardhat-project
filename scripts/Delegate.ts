@@ -1,8 +1,10 @@
-import { createPublicClient, http, createWalletClient, formatEther, hexToString, toHex } from "viem";
+// noinspection DuplicatedCode
+
+import { createPublicClient, http, createWalletClient, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
-import { constants } from "../lib/constants";
+import { abi } from "@artifacts/contracts/Ballot.sol/Ballot.json";
+import { constants } from "@lib/constants";
 
 async function main() {
   // Fetch parameters
@@ -14,14 +16,14 @@ async function main() {
 
   if (!parameters || parameters.length < 1)
     throw new Error("Parameters not provided. You must at least provide the target voter address.");
-  
+
   if (!targetAddress) throw new Error("Target voter address not provided.");
 
   if (!/^0x[a-fA-F0-9]{40}$/.test(targetAddress))
     throw new Error("Invalid target voter address provided.");
-  
+
   if (!contractAddress) throw new Error("Contract address not provided. Either set this in your environment variables, or provide it in the arguments.");
-  
+
   if (!/^0x[a-fA-F0-9]{40}$/.test(contractAddress))
     throw new Error("Invalid contract address provided.");
 

@@ -41,7 +41,7 @@ describe("HelloWorld", function () {
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-viem#contracts
     const contractOwner = await helloWorldContract.read.owner();
     // https://www.chaijs.com/api/bdd/#method_equal
-    expect(contractOwner.toLowerCase()).to.equal(owner.account.address);
+    expect(contractOwner.toLowerCase()).to.equal(owner?.account?.address);
   });
 
   it("Should not allow anyone other than owner to call transferOwnership", async function () {
@@ -50,13 +50,16 @@ describe("HelloWorld", function () {
     );
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-viem#retrieving-an-existing-contract
     const helloWorldContractAsOtherAccount = await viem.getContractAt(
+      // @ts-expect-error ignore
       "HelloWorld",
       helloWorldContract.address,
       { client: { wallet: otherAccount } }
     );
     // https://www.chaijs.com/plugins/chai-as-promised/
     await expect(
+      // @ts-expect-error ignore
       helloWorldContractAsOtherAccount.write.transferOwnership([
+        // @ts-expect-error ignore
         otherAccount.account.address,
       ])
     ).to.be.rejectedWith(nonOwnerError);
@@ -67,6 +70,7 @@ describe("HelloWorld", function () {
       await loadFixture(deployContractFixture);
     // https://hardhat.org/hardhat-runner/plugins/nomicfoundation-hardhat-viem#contracts
     const txHash = await helloWorldContract.write.transferOwnership([
+      // @ts-expect-error ignore
       otherAccount.account.address,
     ]);
     // Transactions are instantly mined in the local network, but it is important to remember to await for confirmations when using a public network
@@ -75,15 +79,18 @@ describe("HelloWorld", function () {
     // https://viem.sh/docs/glossary/terms#transaction-receipt
     expect(receipt.status).to.equal("success");
     const contractOwner = await helloWorldContract.read.owner();
-    expect(contractOwner.toLowerCase()).to.equal(otherAccount.account.address);
+    expect(contractOwner.toLowerCase()).to.equal(otherAccount?.account?.address);
     // It is important to check all relevant indirect effects in your tests
     const helloWorldContractAsPreviousAccount = await viem.getContractAt(
+      // @ts-expect-error ignore
       "HelloWorld",
       helloWorldContract.address,
       { client: { wallet: owner } }
     );
     await expect(
+      // @ts-expect-error ignore
       helloWorldContractAsPreviousAccount.write.transferOwnership([
+        // @ts-expect-error ignore
         owner.account.address,
       ])
     ).to.be.rejectedWith(nonOwnerError);
@@ -93,16 +100,18 @@ describe("HelloWorld", function () {
     // Call setText with someone other than the owner.
     const newText = "New Text";
     const { helloWorldContract, otherAccount } = await loadFixture(deployContractFixture);
-    
+
     // Interact with the contract as otherAccount
     const helloWorldContractAsOtherAccount = await viem.getContractAt(
+      // @ts-expect-error ignore
       "HelloWorld",
       helloWorldContract.address,
       { client: { wallet: otherAccount } }
     );
-    
+
     // Attempt to call setText as a non-owner
     await expect(
+      // @ts-expect-error ignore
       helloWorldContractAsOtherAccount.write.setText([newText])
     ).to.be.rejectedWith(nonOwnerError);
   });

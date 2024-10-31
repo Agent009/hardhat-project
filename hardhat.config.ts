@@ -13,6 +13,7 @@ const config: HardhatUserConfig = {
   },
 };
 
+// @ts-expect-error ignore
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.viem.getWalletClients();
   for (const account of accounts) {

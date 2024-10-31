@@ -1,8 +1,8 @@
 import { createPublicClient, http, createWalletClient, formatEther, hexToString, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { abi, bytecode } from "../artifacts/contracts/Ballot.sol/Ballot.json";
-import { constants } from "../lib/constants";
+import { abi, bytecode } from "@artifacts/contracts/Ballot.sol/Ballot.json";
+import { constants } from "@lib/constants";
 
 
 async function main() {

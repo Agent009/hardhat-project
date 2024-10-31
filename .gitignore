@@ -12,6 +12,9 @@ node_modules
 /typechain
 /typechain-types
 
+# TypeScript
+/out
+
 # solidity-coverage files
 /coverage
 /coverage.json

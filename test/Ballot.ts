@@ -11,13 +11,13 @@ const PROPOSAL_VOTES_IDX = 1;
 const VOTER_WEIGHT_IDX = 0;
 const VOTER_VOTED_IDX = 1;
 const VOTER_DELEGATED_IDX = 2;
-const VOTER_VOTE_IDX = 3;
+// const VOTER_VOTE_IDX = 3;
 
 const deployContract = async () => {
   const publicClient: PublicClient = await viem.getPublicClient();
   const [deployer, otherAccount, otherAccount2] = await viem.getWalletClients();
-  const deployerAddress = deployer.account.address;
-  const otherAddress = otherAccount.account.address;
+  const deployerAddress = deployer!.account.address;
+  const otherAddress = otherAccount!.account.address;
   const ballotContract = await viem.deployContract(CONTRACT_NAME, [
     PROPOSALS.map((prop) => toHex(prop, {size: 32})),
   ]);
@@ -107,7 +107,7 @@ describe(CONTRACT_NAME, async () => {
     it("sets the deployer address as chairperson", async () => {
       const {ballotContract, deployer} = await loadFixture(deployContract);
       const chairperson = await ballotContract.read.chairperson();
-      const deployerAddress = deployer.account.address;
+      const deployerAddress = deployer?.account.address;
       // console.log("Ballot -> deployed -> chairperson -> chairperson", chairperson, "deployer", deployerAddress);
       expect(chairperson.toLowerCase()).to.eq(deployerAddress);
     });
@@ -123,7 +123,7 @@ describe(CONTRACT_NAME, async () => {
 
   describe("when the chairperson interacts with the giveRightToVote function in the contract", async () => {
     it("gives right to vote for another address", async () => {
-      const {publicClient, ballotContract, deployer, otherAddress} = await loadFixture(deployContract);
+      const {publicClient, ballotContract, otherAddress} = await loadFixture(deployContract);
       // Grant right to vote
       await giveRightToVoteFixture(publicClient, ballotContract, otherAddress);
     });
@@ -133,7 +133,7 @@ describe(CONTRACT_NAME, async () => {
       // Grant right to vote
       await giveRightToVoteFixture(publicClient, ballotContract, otherAddress);
       // Make voter vote
-      await voteFixture(ballotContract, 0, otherAccount);
+      await voteFixture(ballotContract, 0, otherAccount!);
       // Assign to same voter again and expect error.
       await expect(
         ballotContract.write.giveRightToVote([otherAddress])
@@ -158,7 +158,7 @@ describe(CONTRACT_NAME, async () => {
       await giveRightToVoteFixture(publicClient, ballotContract, otherAddress);
       // Make voter vote
       const projectIdx = 0;
-      await voteFixture(ballotContract, projectIdx, otherAccount);
+      await voteFixture(ballotContract, projectIdx, otherAccount!);
       // Check that the vote was registered correctly.
       const proposal = await ballotContract.read.proposals([BigInt(projectIdx)]);
       expect(proposal[PROPOSAL_VOTES_IDX]).to.eq(1n);
@@ -179,6 +179,7 @@ describe(CONTRACT_NAME, async () => {
     it("should revert", async () => {
       const {ballotContract, deployerAddress, otherAccount} = await loadFixture(deployContract);
       const contractAsOtherAccount = await viem.getContractAt(
+        // @ts-expect-error ignore
         CONTRACT_NAME,
         ballotContract.address,
         {client: {wallet: otherAccount}}
@@ -193,6 +194,7 @@ describe(CONTRACT_NAME, async () => {
     it("should revert", async () => {
       const {ballotContract, otherAccount} = await loadFixture(deployContract);
       const contractAsOtherAccount = await viem.getContractAt(
+        // @ts-expect-error ignore
         CONTRACT_NAME,
         ballotContract.address,
         {client: {wallet: otherAccount}}
@@ -207,6 +209,7 @@ describe(CONTRACT_NAME, async () => {
     it("should revert", async () => {
       const {ballotContract, deployerAddress, otherAccount} = await loadFixture(deployContract);
       const contractAsOtherAccount = await viem.getContractAt(
+        // @ts-expect-error ignore
         CONTRACT_NAME,
         ballotContract.address,
         {client: {wallet: otherAccount}}
@@ -230,7 +233,7 @@ describe(CONTRACT_NAME, async () => {
       const {ballotContract, deployer} = await loadFixture(deployContract);
       // Cast vote for the first proposal.
       const projectIdx = 0;
-      await voteFixture(ballotContract, projectIdx, deployer);
+      await voteFixture(ballotContract, projectIdx, deployer!);
       // Assert that the first proposal is the winning proposal.
       const proposalIdx = await ballotContract.read.winningProposal();
       expect(proposalIdx).to.equal(0n);
@@ -251,7 +254,7 @@ describe(CONTRACT_NAME, async () => {
       const {ballotContract, deployer} = await loadFixture(deployContract);
       // Cast vote for the first proposal.
       const projectIdx = 0;
-      await voteFixture(ballotContract, projectIdx, deployer);
+      await voteFixture(ballotContract, projectIdx, deployer!);
       // Assert that the first proposal is the winner name.
       const winnerName = await ballotContract.read.winnerName();
       const proposal = await ballotContract.read.proposals([BigInt(0)]);
@@ -276,20 +279,20 @@ describe(CONTRACT_NAME, async () => {
 
       // First random vote
       let randProposalIdx = Math.floor(Math.random() * totalProposals);
-      await voteFixture(ballotContract, randProposalIdx, deployer);
+      await voteFixture(ballotContract, randProposalIdx, deployer!);
       votes["idx-" + randProposalIdx]++;
 
       // Grant the additional accounts the right to vote and cast random votes with them.
       for (const account of [account1, account2, account3, account4]) {
-        await giveRightToVoteFixture(publicClient, ballotContract, account.account.address);
+        await giveRightToVoteFixture(publicClient, ballotContract, account!.account.address);
         randProposalIdx = Math.floor(Math.random() * totalProposals);
-        await voteFixture(ballotContract, randProposalIdx, account, false);
+        await voteFixture(ballotContract, randProposalIdx, account!, false);
         votes["idx-" + randProposalIdx]++;
       }
 
       // Winning proposal name should match the locally calculated winner
-      const winningIdx = Object.keys(votes).reduce((a, b) => votes[a] > votes[b] ? a : b);
-      const winningProposalName = proposalNames[winningIdx];
+      const winningIdx = Object.keys(votes).reduce((a, b) => votes[a]! > votes[b]! ? a : b);
+      const winningProposalName = proposalNames[winningIdx]!;
       const winnerName = await ballotContract.read.winnerName();
       console.log("Ballot -> verify random winner -> proposalNames", proposalNames, "votes", votes, "winningIdx", winningIdx, "winningProposalName", winningProposalName, "winnerName", winnerName);
       expect(winnerName.toLowerCase()).to.equal(winningProposalName.toLowerCase());

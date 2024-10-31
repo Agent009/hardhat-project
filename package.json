@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "hh:accounts": "hardhat accounts",
@@ -23,6 +24,7 @@
     "hardhat": "^2.22.15"
   },
   "dependencies": {
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "typescript": "^5"
   }
 }
