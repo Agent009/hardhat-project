@@ -41,6 +41,6 @@
     },
     "strictNullChecks": true
   },
-  "include": ["**/*.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["./out/**/*", "./node_modules/**/*"]
+  "include": ["**/*.d.ts", "**/*.ts"],
+  "exclude": ["./out/**/*", "**/node_modules/**/*"]
 }

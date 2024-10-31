@@ -1,6 +1,6 @@
 import {expect} from "chai";
 import {toHex, hexToString} from "viem";
-import {viem} from "hardhat";
+import { viem } from "hardhat";
 import {loadFixture} from "@nomicfoundation/hardhat-network-helpers";
 import {PublicClient, WalletClient} from "@nomicfoundation/hardhat-viem/src/types";
 
